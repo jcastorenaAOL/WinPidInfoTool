@@ -3,6 +3,7 @@ using System.Text;
 using System.Globalization;
 using System.Xml;
 using System.Management;
+using System.Diagnostics;
 
 [DllImport("pidgenx.dll", EntryPoint = "PidGenX", CharSet = CharSet.Auto)]
 static extern int PidGenX(string ProductKey, string PkeyPath, string MSPID, int UnknownUsage, IntPtr ProductID, IntPtr DigitalProductID, IntPtr DigitalProductID4);
@@ -129,35 +130,38 @@ static string GetString(byte[] bytes, int index)
 
 
 //Get product key OEM from motherboard
-ManagementObjectSearcher searcher =
-    new ManagementObjectSearcher("SELECT Product, SerialNumber FROM Win32_BaseBoard");
+// ManagementObjectSearcher searcher =
+//     new ManagementObjectSearcher("SELECT Product, SerialNumber FROM Win32_BaseBoard");
 
+// ManagementObjectCollection information = searcher.Get();
+
+// foreach (ManagementObject obj in information)
+// {
+//     foreach (PropertyData data in obj.Properties)
+//         Console.WriteLine("{0} = {1}", data.Name, data.Value);
+//     Console.WriteLine();
+// }
+
+string WIndowsPID = string.Empty;
+
+ManagementObjectSearcher searcher = new ManagementObjectSearcher("select * FROM SoftwareLicensingService");
 ManagementObjectCollection information = searcher.Get();
 
 foreach (ManagementObject obj in information)
 {
     foreach (PropertyData data in obj.Properties)
-        Console.WriteLine("{0} = {1}", data.Name, data.Value);
-    Console.WriteLine();
+        if(data.Name == "OA3xOriginalProductKey"){
+            Console.WriteLine("Windows Key Found! : {0}", data.Value);
+            WIndowsPID = data.Value.ToString();
+        }
+
 }
 
-//Get product key info 
-Console.WriteLine(CheckProductKey("2WH4N-8QGBV-H22JP-CT43Q-MDWWJ"));
+Console.WriteLine(
+    WIndowsPID == string.Empty?
+    "Windows Product Key Not Found!" : 
+    CheckProductKey(WIndowsPID)
+);
 
-
-/*
-Windows 10 Pro	                    W269N-WFGWX-YVC9B-4J6C9-T83GX
-Windows 10 Pro N	                MH37W-N47XK-V7XM9-C7227-GCQG9
-Windows 10 Pro for Workstations	    NRG8B-VKK3Q-CXVCJ-9G2XF-6Q84J
-Windows 10 Pro for Workstations N	9FNHH-K3HBT-3W4TD-6383H-6XYWF
-Windows 10 Pro Education	        6TP4R-GNPTD-KYYHQ-7B7DP-J447Y
-Windows 10 Pro Education N	        YVWGF-BXNMC-HTQYQ-CPQ99-66QFC
-Windows 10 Education	            NW6C2-QMPVW-D7KKK-3GKT6-VCFB2
-Windows 10 Education N	            2WH4N-8QGBV-H22JP-CT43Q-MDWWJ
-Windows 10 Enterprise	            NPPR9-FWDCX-D2C8J-H872K-2YT43
-Windows 10 Enterprise N	            DPH2V-TTNVB-4X9Q3-TJR4H-KHJW4
-Windows 10 Enterprise G	            YYVX9-NTFWV-6MDM3-9PT4T-4M68B
-Windows 10 Enterprise G N	        44RPN-FTY23-9VTTB-MP9BX-T84FV
-*/
-
-
+Console.WriteLine("Press any Key to exit...");
+Console.ReadLine();
